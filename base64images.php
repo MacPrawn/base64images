@@ -40,9 +40,11 @@
     
     if(!defined('ABSPATH')) exit; // Exit if accessed directly
     
+    require_once('classes/class-base-64-images.php');
     function Base64ImagesPlugin() {
-        require_once('classes/class-base-64-images.php');
         return Base64Images::instance();
     }
     add_action('plugins_loaded', 'Base64ImagesPlugin');
+    register_activation_hook(__FILE__, array('Base64Images', 'install'));
+    register_uninstall_hook(__FILE__, array('Base64Images', 'uninstall'));
 ?>

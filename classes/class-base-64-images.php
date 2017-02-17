@@ -13,13 +13,33 @@
     class Base64Images extends Base64ImagesBaseClass {
         const POST_META_BASE64_IMAGE = '_base64_image';
         
+        public static function install() {
+            $plugin = Base64ImagesPlugin();
+            update_option($plugin->token.'-version', $plugin->version);
+        }
+        public static function uninstall() {
+            global $wpdb;
+            
+            $meta_type = 'post';
+            $table = _get_meta_table($meta_type);
+            $type_column = sanitize_key($meta_type.'_id');
+            $meta_key = Base64Images::POST_META_BASE64_IMAGE.'.%';
+            $parent_ids = $wpdb->get_col($wpdb->prepare('SELECT '.$type_column.' FROM '.$table.' WHERE meta_key LIKE %s', $meta_key));
+            $query = $wpdb->prepare('DELETE FROM '.$table.' WHERE meta_key LIKE %s', $meta_key);
+            $wpdb->query($query);
+            
+            if(!empty($parent_ids)) {
+                foreach($parent_ids as $parent_id) wp_cache_delete($parent_id, $meta_type.'_meta');
+            }
+            
+            delete_option($this->token.'-version');
+        }
+        
         public $name = 'Base64 Images Plugin';
         public $token = 'base-64-images';
         public $version = '1.0.0';
         public $plugin_url;
         public $plugin_path;
-        public $admin;
-        public $settings;
         
         private function base64image($id, $url) {
             if(!wp_attachment_is_image($id) || preg_match('/^data\:image/', $url)) return $url;
@@ -50,17 +70,6 @@
             $this->plugin_url = preg_replace('/\/classes/', '', plugin_dir_url(__FILE__));
             $this->plugin_path = preg_replace('/\/classes/', '', plugin_dir_path(__FILE__));
             
-            require_once('class-'.$this->token.'-settings.php');
-            $this->settings = Base64ImagesSettings::instance();
-            
-            if(is_admin()) {
-                require_once('class-'.$this->token.'-admin.php');
-                $this->admin = Base64ImagesAdmin::instance();
-            }
-            
-            register_activation_hook(__FILE__, array($this, 'install'));
-            register_uninstall_hook(__FILE__, array('Base64Images', 'uninstall'));
-            
             add_action('init', array($this, 'initialize'));
             
             add_action('deleted_post', array($this, 'clear_cached_image'));
@@ -78,80 +87,9 @@
         public function initialize() {
             load_plugin_textdomain('base-64-images-plugin-strings', false, $this->plugin_path.'languages/');
         }
-        public function install() {
-            update_option($this->token.'-version', $this->version);
-        }
-        public static function uninstall() {
-            // cleanup base64 encodings in post content?
-            delete_option($this->token.'-version');
-        }
-        
         public function clear_cached_image($post_id) {
             delete_post_meta($post_id, Base64Images::POST_META_BASE64_IMAGE);
         }
-        /*
-        public function image_downsize($downsize, $id, $size) {
-            // if the image's url is a data-encoded url, bypass original image_downsize because url will not work for image sizes. (replace parts of url path...)
-            
-            $insert_request = isset($_POST['attachment']) && !empty($_POST['attachment']);
-            if($insert_request) return false; // insertion in post content. This will be handled by the_content filter.
-            
-            $is_image = wp_attachment_is_image($id);
-            if($is_image) {
-                $is_intermediate = false;
-                $width = $height = 0;
-                $img_real_url = wp_get_attachment_url($id);
-                $img_real_url_basename = wp_basename($img_real_url);
-                if($intermediate = image_get_intermediate_size($id, $size)) {
-                    $img_real_url = str_replace($img_real_url_basename, $intermediate['file'], $img_real_url);
-                    $width = $intermediate['width'];
-                    $height = $intermediate['height'];
-                    $is_intermediate = true;
-                } elseif($size == 'thumbnail') {
-                    // fall back to the old thumbnail
-                    if(($thumb_file = wp_get_attachment_thumb_file($id)) && $info = getimagesize($thumb_file)) {
-                        $img_real_url = str_replace($img_real_url_basename, wp_basename($thumb_file), $img_real_url);
-                        $width = $info[0];
-                        $height = $info[1];
-                        $is_intermediate = true;
-                    }
-                }
-                if(!$width && !$height) {
-                    $meta = wp_get_attachment_metadata($id);
-                    if(isset($meta['width'], $meta['height'])) {
-                        $width = $meta['width'];
-                        $height = $meta['height'];
-                    }
-                }
-                
-                $meta_key = Base64Images::POST_META_BASE64_IMAGE.'.'.$width.'x'.$height;
-                $img_url = get_post_meta($id, $meta_key, true);
-                if(!$img_url) {
-                    $image_path = get_post_meta($id, '_wp_attached_file', true);
-                    if(($uploads = wp_get_upload_dir()) && (false === $uploads['error']) && (0 !== strpos($image_path, $uploads['basedir']))) {
-                        if(false !== strpos($image_path, 'wp-content/uploads')) $image_path = trailingslashit($uploads['basedir'].'/'._wp_get_attachment_relative_path($image_path)).basename($image_path);
-                        else $image_path = $uploads['basedir'].'/'.$image_path;
-                    }
-                    if(file_exists($image_path)) {
-                        $filetype = wp_check_filetype($image_path);
-                        // Read image path, convert to base64 encoding
-                        $imageData = base64_encode(file_get_contents($image_path));
-                        // Format the image SRC:  data:{mime};base64,{data};
-                        $img_url = 'data:image/'.$filetype['ext'].';base64,'.$imageData;
-                        update_post_meta($id, $meta_key, $img_url);
-                    }
-                }
-                
-                if($img_url) {
-                    // we have the actual image size, but might need to further constrain it if content_width is narrower
-                    list($width, $height) = image_constrain_size_for_editor($width, $height, $size);
-                    
-                    return array($img_url, $width, $height, $is_intermediate);
-                }
-            }
-            return false;
-        }
-        */
         public function get_image_tag($html, $id, $alt, $title, $align, $size) {
             // Add image ID to <img> so our content filter can work it's magic
             // In theory, WP already adds the id in the img tag's class (wp-image-<id>) BUT because filters could, potentially remove this, I do not want to rely on it.
