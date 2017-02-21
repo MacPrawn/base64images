@@ -75,8 +75,8 @@
             add_action('deleted_post', array($this, 'clear_cached_image'));
             add_action('wp_update_attachment_metadata', array($this, 'clear_cached_image'));
             
-            //add_filter('image_downsize', array($this, 'image_downsize'), 10, 3);
-            add_filter('get_image_tag', array($this, 'get_image_tag'), 10, 6);
+            //add_filter('get_image_tag', array($this, 'get_image_tag'), 10, 6);
+            add_filter('get_image_tag_class', array($this, 'get_image_tag_class'), 1000, 4);
             add_filter('wp_get_attachment_image_src', array($this, 'wp_get_attachment_image_src'), 10, 4);
             add_filter('the_content', array($this, 'the_content'), 999999);
         }
@@ -90,10 +90,16 @@
         public function clear_cached_image($post_id) {
             delete_post_meta($post_id, Base64Images::POST_META_BASE64_IMAGE);
         }
+        /*
         public function get_image_tag($html, $id, $alt, $title, $align, $size) {
             // Add image ID to <img> so our content filter can work it's magic
             // In theory, WP already adds the id in the img tag's class (wp-image-<id>) BUT because filters could, potentially remove this, I do not want to rely on it.
             return preg_replace('/<img/i', '<img data-wp-image-id="'.$id.'"', $html);
+        }
+        */
+        public function get_image_tag_class($class, $id, $align, $size) {
+            if(!preg_match('/\bwp\-\image\-'.$id.'\b/', $class)) $class .= ' wp-image-'.$id;
+            return $class;
         }
         public function wp_get_attachment_image_src($image, $attachment_id, $size, $icon) {
             if(!$image) return $image;
@@ -101,25 +107,26 @@
             return $image;
         }
         public function the_content($content) {
-            while(preg_match('/(<img[^>]+?)data\-wp\-image\-id\="(\d+)"([^>]*?>)/i', $content, $matches)) {
-                $full_match = $matches[0];
-                $replacement = $matches[1].$matches[3]; // remove data-wp-image-id so we don't fall into an infinite loop!
-                $attachment_id = intVal($matches[2]);
-                if($attachment_id && preg_match('/src\s*?\=\s*?[\'"]([^\'"]+?)[\'"]/', $replacement, $matches)) {
-                    $original_url = $matches[1];
-                    $url = $this->base64image($attachment_id, $original_url);
-                    if($url != $original_url) {
-                        $start = strpos($replacement, ' src');
-                        $length = strlen($matches[0]);
-                        //$replacement = substr($replacement, $start, $length).' src="'.$url.'"'.substr($replacement, $length + 1);
-                        $replacement = preg_replace('/'.preg_quote($matches[0], '/').'/im', 'src="'.$url.'"', $replacement);
-                        $replacement = preg_replace('/srcset\s*?\=\s*?[\'"]([^\'"]+?)[\'"]/', '', $replacement);
-                        $replacement = preg_replace('/sizes\s*?\=\s*?[\'"]([^\'"]+?)[\'"]/', '', $replacement);
+            if(preg_match_all('/<img[^>]+?\bwp\-image\-(\d+)\b[^>]*?>/i', $content, $matches)) {
+                for($loop = 0; $loop < count($matches[0]); $loop++) {
+                    $full_match = $matches[0][$loop];
+                    $replacement = $full_match;
+                    $attachment_id = intVal($matches[1][$loop]);
+                    if($attachment_id && preg_match('/src\s*?\=\s*?[\'"]([^\'"]+?)[\'"]/', $replacement, $matches)) {
+                        $original_url = $matches[1];
+                        $url = $this->base64image($attachment_id, $original_url);
+                        if($url != $original_url) {
+                            $start = strpos($replacement, ' src');
+                            $length = strlen($matches[0]);
+                            //$replacement = substr($replacement, $start, $length).' src="'.$url.'"'.substr($replacement, $length + 1);
+                            $replacement = preg_replace('/'.preg_quote($matches[0], '/').'/im', 'src="'.$url.'"', $replacement);
+                            $replacement = preg_replace('/srcset\s*?\=\s*?[\'"]([^\'"]+?)[\'"]/', '', $replacement);
+                            $replacement = preg_replace('/sizes\s*?\=\s*?[\'"]([^\'"]+?)[\'"]/', '', $replacement);
+                        }
                     }
+                    if($full_match != $replacement) $content = preg_replace('/'.preg_quote($full_match, '/').'/im', $replacement, $content);
                 }
-                if($full_match) $content = preg_replace('/'.preg_quote($full_match, '/').'/im', $replacement, $content);
             }
-            
             return $content;
         }
     }
