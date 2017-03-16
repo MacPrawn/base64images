@@ -13,9 +13,10 @@
     class Base64Images extends Base64ImagesBaseClass {
         const POST_META_BASE64_IMAGE = '_base64_image';
         
+        public static $token = 'base-64-images';
         public static function install() {
             $plugin = Base64ImagesPlugin();
-            update_option($plugin->token.'-version', $plugin->version);
+            update_option(Base64Images::$token.'-version', $plugin->version);
         }
         public static function uninstall() {
             global $wpdb;
@@ -32,12 +33,11 @@
                 foreach($parent_ids as $parent_id) wp_cache_delete($parent_id, $meta_type.'_meta');
             }
             
-            delete_option($this->token.'-version');
+            delete_option(Base64Images::$token.'-version');
         }
         
         public $name = 'Base64 Images Plugin';
-        public $token = 'base-64-images';
-        public $version = '1.0.0';
+        public $version = '1.0.1';
         public $plugin_url;
         public $plugin_path;
         

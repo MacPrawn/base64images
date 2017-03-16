@@ -3,7 +3,7 @@ Contributors: macprawn
 Tags: base64, encoder, image, images
 Requires at least: 4.0.0
 Tested up to: 4.7.2
-Stable tag: trunk
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,5 +26,8 @@ Activate the plugin - and that\'s all there is to it!
 2. Plugin activated: image no longer loads separately. Instead, it is embedded in the page\'s source.
 
 == Changelog ==
+= 1.0.1 =
+* Fixed small bug when uninstalling the plugin.
+
 = 1.0 =
 * Initial release.
