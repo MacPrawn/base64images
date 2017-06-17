@@ -73,8 +73,8 @@
             add_action('init', array($this, 'initialize'));
             
             add_action('deleted_post', array($this, 'clear_cached_image'));
-            add_action('wp_update_attachment_metadata', array($this, 'clear_cached_image'));
             
+            add_filter('wp_update_attachment_metadata', array($this, 'clear_cached_image'), 10, 2);
             //add_filter('get_image_tag', array($this, 'get_image_tag'), 10, 6);
             add_filter('get_image_tag_class', array($this, 'get_image_tag_class'), 1000, 4);
             add_filter('wp_get_attachment_image_src', array($this, 'wp_get_attachment_image_src'), 10, 4);
@@ -87,8 +87,9 @@
         public function initialize() {
             load_plugin_textdomain('base-64-images-plugin-strings', false, $this->plugin_path.'languages/');
         }
-        public function clear_cached_image($post_id) {
+        public function clear_cached_image($meta_data, $post_id) {
             delete_post_meta($post_id, Base64Images::POST_META_BASE64_IMAGE);
+            return $meta_data;
         }
         /*
         public function get_image_tag($html, $id, $alt, $title, $align, $size) {
