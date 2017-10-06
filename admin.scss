@@ -1,0 +1,13 @@
+.base64images-settings-section {
+    position: relative;
+    
+    .base64images-logo-container {
+        position: absolute;
+        right: 15px;
+        top: -60px;
+        
+        img {
+            max-height: 24px;
+        }
+    }
+}
