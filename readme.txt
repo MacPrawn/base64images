@@ -3,7 +3,7 @@ Contributors: macprawn
 Tags: base64, encoder, image, images
 Requires at least: 4.0.0
 Tested up to: 4.8.1
-Stable tag: 1.1
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,6 +26,9 @@ Activate the plugin - and that\'s all there is to it!
 2. Plugin activated: image no longer loads separately. Instead, it is embedded in the page\'s source.
 
 == Changelog ==
+= 1.1.1 =
+* Fixed bug when deleting posts/attachments.
+
 = 1.1 =
 * Added setting to control the maximum image size that should be encoded.
 * Fixed bug when multiple images on a page would sometimes not all get encoded.

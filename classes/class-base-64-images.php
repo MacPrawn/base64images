@@ -44,7 +44,7 @@
         }
         
         public $name = 'Base64 Images Plugin';
-        public $version = '1.1.0';
+        public $version = '1.1.1';
         public $plugin_url;
         public $plugin_path;
         
@@ -82,7 +82,7 @@
             
             add_action('init', array($this, 'initialize'));
             
-            add_action('deleted_post', array($this, 'clear_cached_image'));
+            add_action('deleted_post', array($this, 'clear_cached_image_for_deleted_post'));
             
             add_filter('wp_update_attachment_metadata', array($this, 'clear_cached_image'), 10, 2);
             add_filter('get_image_tag_class', array($this, 'get_image_tag_class'), 1000, 4);
@@ -152,6 +152,9 @@
             return array_merge($action_links, $links);
         }
         
+        public function clear_cached_image_for_deleted_post($post_id) {
+            delete_post_meta($post_id, Base64Images::POST_META_BASE64_IMAGE);
+        }
         public function clear_cached_image($meta_data, $post_id) {
             delete_post_meta($post_id, Base64Images::POST_META_BASE64_IMAGE);
             return $meta_data;
