@@ -44,7 +44,7 @@
         }
         
         public $name = 'Base64 Images Plugin';
-        public $version = '1.1.1';
+        public $version = '1.1.2';
         public $plugin_url;
         public $plugin_path;
         
@@ -103,9 +103,9 @@
         }
         public function initialize_admin() {
             add_settings_section(Base64Images::SETTINGS_SECTION, __('Base64 Images Settings', 'base-64-images-plugin-strings'), array($this, 'general_settings_section'), 'media');
-            add_settings_field(Base64Images::MAX_SIZE, __('Encode Images up to', 'base-64-images-plugin-strings'), array($this, 'size_setting'), 'media', Base64Images::SETTINGS_SECTION, [
+            add_settings_field(Base64Images::MAX_SIZE, __('Encode Images up to', 'base-64-images-plugin-strings'), array($this, 'size_setting'), 'media', Base64Images::SETTINGS_SECTION, array(
                 'label_for' => Base64Images::MAX_SIZE
-            ]);
+            ));
             
             register_setting('media', Base64Images::MAX_SIZE);
         }

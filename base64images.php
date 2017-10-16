@@ -3,7 +3,7 @@
     * Plugin Name: Base64 Images
     * Plugin URI: https://bitbucket.org/MacPrawn/base64images
     * Description: Automatically base64 encodes media images on your site.
-    * Version: 1.1.1
+    * Version: 1.1.2
     * Author: Jean Le Clerc
     * Author URI: http://nibnut.com
     * License: GPLv2 or later
