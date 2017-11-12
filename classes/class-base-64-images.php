@@ -44,7 +44,7 @@
         }
         
         public $name = 'Base64 Images Plugin';
-        public $version = '1.1.2';
+        public $version = '1.1.3';
         public $plugin_url;
         public $plugin_path;
         
@@ -117,7 +117,7 @@
         public function general_settings_section($args) {
         ?>
             <hr>
-            <div class="base64images-settings-section">
+            <div id="base64images-settings-section" class="base64images-settings-section">
                 <div class="base64images-logo-container">
                     <a href="https://nibnut.com" target="_blank">
                         <img src="<?php echo plugins_url('../img/nibnut-logo.png', __FILE__); ?>" />
@@ -147,7 +147,7 @@
         }
         public function plugin_list_settings($links) {
             $action_links = array(
-                'settings' => '<a href="'.admin_url('admin.php?page=base-64-images-settings').'">'.__('Settings', 'base-64-images-plugin-strings').'</a>',
+                'settings' => '<a href="'.admin_url('options-media.php#base64images-settings-section').'">'.__('Settings', 'base-64-images-plugin-strings').'</a>',
             );
             return array_merge($action_links, $links);
         }

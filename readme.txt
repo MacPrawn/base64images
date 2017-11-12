@@ -2,8 +2,8 @@
 Contributors: macprawn
 Tags: base64, encoder, image, images
 Requires at least: 4.0.0
-Tested up to: 4.8.1
-Stable tag: 1.1.2
+Tested up to: 4.9
+Stable tag: 1.1.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,6 +26,9 @@ Activate the plugin - and that\'s all there is to it!
 2. Plugin activated: image no longer loads separately. Instead, it is embedded in the page\'s source.
 
 == Changelog ==
+= 1.1.3 =
+* Fixed plugin's Settings link on the Plugins page.
+
 = 1.1.2 =
 * Fixed syntax error on older PHP versions.
 
