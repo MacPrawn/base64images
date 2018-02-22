@@ -3,7 +3,7 @@ Contributors: macprawn
 Tags: base64, encoder, image, images
 Requires at least: 4.0.0
 Tested up to: 4.9
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,6 +26,9 @@ Activate the plugin - and that\'s all there is to it!
 2. Plugin activated: image no longer loads separately. Instead, it is embedded in the page\'s source.
 
 == Changelog ==
+= 1.1.4 =
+* Plugin defers action until after page header, to allow open graph images to embed un-encoded.
+
 = 1.1.3 =
 * Fixed plugin's Settings link on the Plugins page.
 

@@ -43,8 +43,10 @@
             delete_option(Base64Images::$token.'-version');
         }
         
+        private $quiet = true;
+        
         public $name = 'Base64 Images Plugin';
-        public $version = '1.1.3';
+        public $version = '1.1.4';
         public $plugin_url;
         public $plugin_path;
         
@@ -83,6 +85,7 @@
             add_action('init', array($this, 'initialize'));
             
             add_action('deleted_post', array($this, 'clear_cached_image_for_deleted_post'));
+            add_action('wp_head', array($this, 'wp_head'), 999999);
             
             add_filter('wp_update_attachment_metadata', array($this, 'clear_cached_image'), 10, 2);
             add_filter('get_image_tag_class', array($this, 'get_image_tag_class'), 1000, 4);
@@ -152,6 +155,10 @@
             return array_merge($action_links, $links);
         }
         
+        public function wp_head() {
+            $this->quiet = false;
+        }
+        
         public function clear_cached_image_for_deleted_post($post_id) {
             delete_post_meta($post_id, Base64Images::POST_META_BASE64_IMAGE);
         }
@@ -164,7 +171,7 @@
             return $class;
         }
         public function wp_get_attachment_image_src($image, $attachment_id, $size, $icon) {
-            if(!$image) return $image;
+            if(!$image || $this->quiet) return $image;
             $image[0] = $this->base64image($attachment_id, $image[0]);
             return $image;
         }
